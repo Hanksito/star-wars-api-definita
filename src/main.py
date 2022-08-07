@@ -29,15 +29,57 @@ def handle_invalid_usage(error):
 @app.route('/')
 def sitemap():
     return generate_sitemap(app)
+# Listar todos los usuarios del blog
+@app.route('/users', methods=['GET'])
+def get_all_Users():
+    try:
+        response = [x.serialize() for x in User.query.all()]
+        return jsonify(response), 200
+    except:
+        return "invalid Method ", 401
+#  Añade un nuevo planet favorito al usuario
+@app.route('/planetfavorites/<int:planet_id>', methods=['POST'])
+def post_PlanetFavorites(planet_id):
+    try:
+        planet = request.json.get(planet_id)
+        db.session.add(planet)
+        db.session.commit()
+        return "añadido a favoritos",200
+    except:
+        return "Invalid Method", 404
+#  Listar todos los registros de people en la base de datos
+@app.route('/people', methods=['GET'])
+def get_all_people():
+    try:
+        response = [x.serialize() for x in People.query.all()]
+        return jsonify(response),200
+    except:
+        return "invalid Method ", 400
+# Listar la información de una sola people
+@app.route('/people/int:id', methods=['GET'])
+def get_one_planet(id):
+    try:
+        response = [People.query.get(id)]
+        return jsonify(response.serialize()),200
+    except:
+        return "invalid Method ", 400
+#  Listar todos los registros de planet en la base de datos
+@app.route('/planet', methods=['GET'])
+def get_all_planet():
+    try:
+        response = [x.serialize() for x in Planet.query.all()]
+        return jsonify(response),200
+    except:
+        return "invalid Method ", 400
+# Listar la información de un solo planet
+@app.route('/planet/int:id', methods=['GET'])
+def get_one_planet(id):
+    try:
+        response = [Planet.query.get(id)]
+        return jsonify(response.serialize()),200
+    except:
+        return "invalid Method ", 400
 
-@app.route('/user', methods=['GET'])
-def handle_hello():
-
-    response_body = {
-        "msg": "Hello, this is your GET /user response "
-    }
-
-    return jsonify(response_body), 200
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
