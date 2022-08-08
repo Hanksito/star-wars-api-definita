@@ -22,7 +22,7 @@ class User(db.Model):
     peoplefavourites = db.relationship('People',secondary=peoplefavourites, lazy='subquery', backref=db.backref('user', lazy=True))
 
     def __repr__(self):
-        return '<User %r>' % self.username
+        return '<User %r>' % self.name
 
     def serialize(self):
         return {
@@ -40,7 +40,7 @@ class Planet(db.Model):
     terrain = db.Column(db.String(250))
 
     def __repr__(self):
-        return '<Planet %r>' % self.Planet
+        return '<Planet %r>' % self.name
 
     def serialize(self):
         return {
@@ -58,7 +58,7 @@ class People(db.Model):
     gender = db.Column(db.String(250))
     
     def __repr__(self):
-        return '<People %r>' % self.People
+        return '<People %r>' % self.name
 
     def serialize(self):
         return {

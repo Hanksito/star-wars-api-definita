@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
+from models import db, User, People, Planet
 #from models import Person
 
 app = Flask(__name__)
@@ -37,16 +37,96 @@ def get_all_Users():
         return jsonify(response), 200
     except:
         return "invalid Method ", 401
+# Elimina un planet favorito con el id = planet_id`.
+@app.route('/planetfavorites/<int:planet_id>',methods=['DELETE'])
+def delete_planetfavorites(planet_id):
+
+    users = request.json.get("User")
+    userObj = User.query.filter_by( id = users["id"]).first()
+    planetObj = Planet.query.filter_by(id != planet_id).first()
+
+    if not  userObj or not planetObj:
+        raise APIException("User or planet not found",404)
+
+    elif planetObj not in userObj.planetfavourites:
+        raise APIException("Planet not on favorites",400)
+    
+    else:
+        userObj.planetfavorites.append(planetObj)
+        db.session.commit()
+
+        return jsonify("Planet deleted",200)
+
+# Elimina un people favorito con el id = people_id`.
+@app.route('/peoplefavorites/<int:people_id>',methods=['DELETE'])
+def delete_peoplefavorites(people_id):
+
+    users = request.json.get("User")
+    userObj = User.query.filter_by( id = users["id"]).first()
+    peopleObj = People.query.filter_by(id != people_id).first()
+
+    if not  userObj or not peopleObj:
+        raise APIException("User or people not found",404)
+
+    elif peopleObj not in userObj.peoplefavourites:
+        raise APIException("People not on favorites",400)
+    
+    else:
+        userObj.peoplefavorites.append(peopleObj)
+        db.session.commit()
+
+        return jsonify("People deleted",200)
+@app.route('/people/<int:people_id>', methods=['GET'])
+def get_all_people():
+    try:
+        planetObj = Planet.query.filter_by(id = planet_id).first()
+
+        return jsonify(planetObj.serialize()),200
+    except:
+        return "invalid Method ", 400
+
 #  Añade un nuevo planet favorito al usuario
 @app.route('/planetfavorites/<int:planet_id>', methods=['POST'])
 def post_PlanetFavorites(planet_id):
-    try:
-        planet = request.json.get(planet_id)
-        db.session.add(planet)
+
+    users = request.json.get("User")
+    userObj = User.query.filter_by( id = users["id"]).first()
+    planetObj = Planet.query.filter_by(id = planet_id).first()
+
+    if not  userObj or not planetObj:
+        raise APIException("User or planet not found",404)
+
+    elif planetObj in userObj.planetfavourites:
+
+        raise APIException("Planet on favorites",400)
+
+    else:
+        userObj.planetfavourites.append(planetObj)
         db.session.commit()
-        return "añadido a favoritos",200
-    except:
-        return "Invalid Method", 404
+
+        return jsonify("Planet add",200)
+
+#  Añade un nuevo people favorito al usuario
+@app.route('/people/<int:people_id>', methods=['POST'])
+def post_PeopleFavorites(people_id):
+
+    users = request.json.get("User")
+    userObj = User.query.filter_by( id = users["id"]).first()
+    peopleObj = People.query.filter_by(id = people_id).first()
+
+    if not  userObj or not peopleObj:
+        raise APIException("User or people not found",404)
+
+    elif peopleObj in userObj.peoplefavourites:
+
+        raise APIException("people on favorites",400)
+
+    else:
+        userObj.peoplefavourites.append(peopleObj)
+        db.session.commit()
+
+        return jsonify("People add",200)
+
 #  Listar todos los registros de people en la base de datos
 @app.route('/people', methods=['GET'])
 def get_all_people():
