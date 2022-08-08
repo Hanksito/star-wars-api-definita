@@ -18,8 +18,8 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(80), unique=False, nullable=False)
     is_active = db.Column(db.Boolean(), unique=False, nullable=False)
-    planetfavourites = db.relationship('Planet',secondary=planetfavourites, lazy='subquery')
-    peoplefavourites = db.relationship('People',secondary=peoplefavourites, lazy='subquery')
+    planetfavourites = db.relationship('Planet',secondary=planetfavourites, lazy='subquery', backref=db.backref('user', lazy=True))
+    peoplefavourites = db.relationship('People',secondary=peoplefavourites, lazy='subquery', backref=db.backref('user', lazy=True))
 
     def __repr__(self):
         return '<User %r>' % self.username

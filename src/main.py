@@ -57,7 +57,7 @@ def get_all_people():
         return "invalid Method ", 400
 # Listar la información de una sola people
 @app.route('/people/int:id', methods=['GET'])
-def get_one_planet(id):
+def get_one_people(id):
     try:
         response = [People.query.get(id)]
         return jsonify(response.serialize()),200
