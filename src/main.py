@@ -43,19 +43,10 @@ def delete_planetfavorites(planet_id):
 
     users = request.json.get("User")
     userObj = User.query.filter_by( id = users["id"]).first()
-    planetObj = Planet.query.filter_by(id != planet_id).first()
-
-    if not  userObj or not planetObj:
-        raise APIException("User or planet not found",404)
-
-    elif planetObj not in userObj.planetfavourites:
-        raise APIException("Planet not on favorites",400)
-    
-    else:
-        userObj.planetfavorites.append(planetObj)
-        db.session.commit()
-
-        return jsonify("Planet deleted",200)
+    planetObj = Planet.query.filter_by(id = planet_id).first()
+    userObj.planetfavourites.remove(planetObj)
+    db.session.commit()
+    return jsonify("Planet deleted",200)
 
 # Elimina un people favorito con el id = people_id`.
 @app.route('/peoplefavorites/<int:people_id>',methods=['DELETE'])
@@ -63,27 +54,11 @@ def delete_peoplefavorites(people_id):
 
     users = request.json.get("User")
     userObj = User.query.filter_by( id = users["id"]).first()
-    peopleObj = People.query.filter_by(id != people_id).first()
+    peopleObj = People.query.filter_by(id = people_id).first()
+    userObj.peoplefavourites.remove(peopleObj)
+    db.session.commit()
+    return jsonify("People deleted",200)
 
-    if not  userObj or not peopleObj:
-        raise APIException("User or people not found",404)
-
-    elif peopleObj not in userObj.peoplefavourites:
-        raise APIException("People not on favorites",400)
-    
-    else:
-        userObj.peoplefavorites.append(peopleObj)
-        db.session.commit()
-
-        return jsonify("People deleted",200)
-@app.route('/people/<int:people_id>', methods=['GET'])
-def get_all_people():
-    try:
-        planetObj = Planet.query.filter_by(id = planet_id).first()
-
-        return jsonify(planetObj.serialize()),200
-    except:
-        return "invalid Method ", 400
 
 #  Añade un nuevo planet favorito al usuario
 @app.route('/planetfavorites/<int:planet_id>', methods=['POST'])
@@ -107,7 +82,7 @@ def post_PlanetFavorites(planet_id):
         return jsonify("Planet add",200)
 
 #  Añade un nuevo people favorito al usuario
-@app.route('/people/<int:people_id>', methods=['POST'])
+@app.route('/peoplefavorites/<int:people_id>', methods=['POST'])
 def post_PeopleFavorites(people_id):
 
     users = request.json.get("User")
@@ -136,10 +111,10 @@ def get_all_people():
     except:
         return "invalid Method ", 400
 # Listar la información de una sola people
-@app.route('/people/int:id', methods=['GET'])
+@app.route('/people/<int:id>', methods=['GET'])
 def get_one_people(id):
     try:
-        response = [People.query.get(id)]
+        response = People.query.get(id)
         return jsonify(response.serialize()),200
     except:
         return "invalid Method ", 400
@@ -152,14 +127,19 @@ def get_all_planet():
     except:
         return "invalid Method ", 400
 # Listar la información de un solo planet
-@app.route('/planet/int:id', methods=['GET'])
+@app.route('/planet/<int:id>', methods=['GET'])
 def get_one_planet(id):
-    try:
-        response = [Planet.query.get(id)]
-        return jsonify(response.serialize()),200
-    except:
-        return "invalid Method ", 400
-
+    
+    response = Planet.query.get(id)
+    return jsonify(response.serialize()),200
+    
+@app.route('/favorites',methods=['GET'])        
+def get_all_favourites():
+    
+    user = request.json.get("User")
+    userObj = User.query.filter_by( id = user["id"]).first()
+    favorites = [favorite.serialize() for favorite in userObj.planetfavourites + userObj.peoplefavourites]
+    return jsonify(favorites), 200
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
